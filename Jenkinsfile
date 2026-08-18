@@ -10,7 +10,7 @@ pipeline {
         stage("lancer test newman")
         {
             steps{
-                sh "newman run .\collection.json -e .\preprod.json "
+                sh "newman run ./collection.json -e ./preprod.json "
             }
         }
 
