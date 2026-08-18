@@ -1,0 +1,847 @@
+{
+  "info": {
+    "_postman_id": "21a85005-256f-4810-981f-f3a78bde9ca5",
+    "name": "Produits",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40201266",
+    "_collection_link": "https://go.postman.co/collection/40201266-21a85005-256f-4810-981f-f3a78bde9ca5?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "CHoisir deux produits",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "let nbr_article = Math.floor(Math.random()*4)+2;\r",
+              "pm.collectionVariables.set(\"nbr_article\",nbr_article);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let article_Trouvé = 0;\r",
+              "let res = pm.response.json();\r",
+              "let nb_Articles = res.products.length; \r",
+              "let articles = res.products; \r",
+              "let articles_achetes = [];\r",
+              "let nbr = pm.collectionVariables.get(\"nbr_article\"); \r",
+              "\r",
+              "while (article_Trouvé < 2) \r",
+              "{   \r",
+              "    \r",
+              "    let article_Random = Math.floor(Math.random() * nb_Articles);\r",
+              "    if(articles[article_Random].stock > 0 && !articles_achetes.includes(articles[article_Random]) && articles[article_Random].stock >= nbr )\r",
+              "    {\r",
+              "        articles_achetes.push(articles[article_Random]);\r",
+              "        article_Trouvé++;\r",
+              "    }\r",
+              "}\r",
+              "\r",
+              "pm.collectionVariables.set(\"produits_achetes\",articles_achetes);\r",
+              "\r",
+              "for(let product of articles_achetes)\r",
+              "{\r",
+              "    console.log(\"name \"+product.name+\" stock \"+product.stock+\" price \"+product.price);\r",
+              "}\r",
+              "\r",
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Check if nbr produits achetes supp au random\", function () {\r",
+              "    for(let product of articles_achetes)\r",
+              "    {\r",
+              "        pm.expect(product.stock).to.be.greaterThanOrEqual(nbr)\r",
+              "\r",
+              "    }\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/products",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add user Copy",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "let random =Math.floor(Math.random()*101);\r",
+              "let role;\r",
+              "if(random < 60) {\r",
+              "    role = \"admin\";\r",
+              "}\r",
+              "\r",
+              "else\r",
+              "{\r",
+              " role = \"user\"\r",
+              "}\r",
+              "pm.collectionVariables.set(\"role\",role)\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"verifier reposnse == request \",()=>\r",
+              "{\r",
+              "    let body_req = JSON.parse(pm.request.body.raw);\r",
+              "    let body_res = pm.response.json();\r",
+              "    console.log(body_req.email)\r",
+              "    console.log(body_req.name)\r",
+              "    console.log(body_req.role)\r",
+              "   \r",
+              "\r",
+              "    pm.expect(body_req.email).equal(body_res.user.email)\r",
+              "    pm.expect(body_req.name).equal(body_res.user.name)\r",
+              "    pm.expect(body_req.role).equal(body_res.user.role)\r",
+              "\r",
+              "    pm.collectionVariables.set(\"name\",body_req.name)\r",
+              "    pm.collectionVariables.set(\"email\",body_req.email)\r",
+              "    pm.collectionVariables.set(\"pwd\",body_req.password)\r",
+              "    pm.collectionVariables.set(\"id\",body_res.user.id)\r",
+              "\r",
+              "\r",
+              "\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"{{$randomFullName}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"role\":\"{{role}}\" \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/register",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "connexion Copy",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Verifier si connexion reussi\", function () {\r",
+              "    let body_res = pm.response.json();\r",
+              "\r",
+              "    pm.expect(pm.collectionVariables.get(\"name\")).equal(body_res.user.name)\r",
+              "    pm.expect(body_res.success).to.be.true;\r",
+              "\r",
+              "    pm.collectionVariables.set(\"token\",body_res.token)\r",
+              "\r",
+              "    });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{email}}\",\r\n  \"password\": \"{{pwd}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/login",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ajout panier produit 1",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "let id_produit = pm.collectionVariables.get(\"produits_achetes\")[0].id;\r",
+              "pm.collectionVariables.set(\"id_produit\", id_produit)\r",
+              "console.log(id_produit)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"body req = res\", function () {\r",
+              "let body_req = JSON.parse(pm.request.body.raw);\r",
+              "let body_res = pm.response.json();\r",
+              "pm.expect(body_req.product_id).equal(body_res.cart[0].product_id);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"product_id\": {{id_produit}},\r\n  \"quantity\": {{nbr_article}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/cart",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "cart"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ajout panier produit 2",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "let id_produit = pm.collectionVariables.get(\"produits_achetes\")[1].id;\r",
+              "pm.collectionVariables.set(\"id_produit\", id_produit)\r",
+              "console.log(id_produit)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let body_res = pm.response.json();\r",
+              "\r",
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"body req = res\", function () {\r",
+              "let body_req = JSON.parse(pm.request.body.raw);\r",
+              "pm.expect(body_req.product_id).equal(body_res.cart[1].product_id);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"verifier si la somme des article * qte egale aux total\" , () =>\r",
+              "{\r",
+              "    let total_produit1 = body_res.cart[0].price * body_res.cart[0].quantity;\r",
+              "    let total_produit2 = body_res.cart[1].price * body_res.cart[1].quantity;\r",
+              "    let total = total_produit1 + total_produit2;\r",
+              "    pm.expect(total.toFixed(2)).equal(body_res.total.toFixed(2)); \r",
+              "\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"product_id\": {{id_produit}},\r\n  \"quantity\": {{nbr_article}}\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/cart",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "cart"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get panier",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"nbr produits === 2\" , function () {\r",
+              "    pm.expect(pm.response.json().cart.length).to.eql(2);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/cart",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "cart"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "valider order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Verfier statut est en attennte \", function () {\r",
+              "     let body_res = pm .response.json()\r",
+              "     let statut = body_res.order.status\r",
+              "     pm.expect(statut).to.eql(\"en_attente\");\r",
+              "     // set id order \r",
+              "     pm.collectionVariables.set(\"order_id\", body_res.order.id);\r",
+              "     });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/orders",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "payer commende",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"verifier si order a été payé\", function () {\r",
+              "  let body_res = pm.response.json();\r",
+              "  pm.expect(body_res.order_status).to.eql(\"payee\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"payment_method\": \"pm_card_visa\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/orders/{{order_id}}/pay",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "orders",
+            "{{order_id}}",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "add user Copy 2",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "let random =Math.floor(Math.random()*101);\r",
+              "let role;\r",
+              "if(random < 60) {\r",
+              "    role = \"admin\";\r",
+              "}\r",
+              "\r",
+              "else\r",
+              "{\r",
+              " role = \"user\"\r",
+              "}\r",
+              "pm.collectionVariables.set(\"role\",role)\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"verifier reposnse == request \",()=>\r",
+              "{\r",
+              "    let body_req = JSON.parse(pm.request.body.raw);\r",
+              "    let body_res = pm.response.json();\r",
+              "   \r",
+              "\r",
+              "    pm.expect(body_req.email).equal(body_res.user.email)\r",
+              "    pm.expect(body_req.name).equal(body_res.user.name)\r",
+              "    pm.expect(body_req.role).equal(body_res.user.role)\r",
+              "\r",
+              "    pm.collectionVariables.set(\"emailAdmin\",body_req.email)\r",
+              "    pm.collectionVariables.set(\"pwdAdmin\",body_req.password)\r",
+              "    \r",
+              "\r",
+              "\r",
+              "\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"name\": \"{{$randomFullName}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"password\": \"{{$randomPassword}}\",\r\n  \"role\":\"admin\" \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/register",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "connexion Copy 2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Verifier si connexion reussi\", function () {\r",
+              "    let body_res = pm.response.json();\r",
+              "\r",
+              "    pm.expect(body_res.success).to.be.true;\r",
+              "\r",
+              "    pm.collectionVariables.set(\"tokenAdmin\",body_res.token)\r",
+              "\r",
+              "    });"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"email\": \"{{emailAdmin}}\",\r\n  \"password\": \"{{pwdAdmin}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/login",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "expidier la commande",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"verifier statut order est expidie \", () => {\r",
+              "    let body_res = pm.response.json();\r",
+              "    pm.expect(body_res.order.status).to.eql(\"expediee\");\r",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"status\": \"expediee\"\r\n}"
+        },
+        "url": {
+          "raw": "https://api.efi-academy.com/user-api/public/orders/{{order_id}}",
+          "protocol": "https",
+          "host": [
+            "api",
+            "efi-academy",
+            "com"
+          ],
+          "path": [
+            "user-api",
+            "public",
+            "orders",
+            "{{order_id}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "nbr_article",
+      "value": ""
+    },
+    {
+      "key": "produits_achetes",
+      "value": ""
+    },
+    {
+      "key": "role",
+      "value": ""
+    },
+    {
+      "key": "name",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": ""
+    },
+    {
+      "key": "pwd",
+      "value": ""
+    },
+    {
+      "key": "id",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "id_produit",
+      "value": ""
+    },
+    {
+      "key": "order_id",
+      "value": ""
+    },
+    {
+      "key": "emailAdmin",
+      "value": ""
+    },
+    {
+      "key": "pwdAdmin",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin",
+      "value": ""
+    }
+  ]
+}
